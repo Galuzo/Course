@@ -1,6 +1,11 @@
 #include"Lib.h"
 #include <stdio.h>
 #include "UserFunc.h"
+#include <string.h>
+#include <shlwapi.h>
+
+
+
 int CALLBACK SortUpDir(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 void AddIconToListBox(HWND hWndListBox, int size, TCHAR c_dir[MAX_PATH]);
 
@@ -67,6 +72,7 @@ void LoadFileList(HWND hWndListBox, TCHAR *path)
 	SYSTEMTIME fileDate;		
 	TCHAR cTmp[256], cTmp2[256];
 	TCHAR path2[MAX_PATH];
+	TCHAR sds[MAX_PATH];
 
 	SendMessage(hWndListBox, LVM_DELETEALLITEMS, 0, 0);
 
@@ -89,6 +95,7 @@ void LoadFileList(HWND hWndListBox, TCHAR *path)
 			lvi.iImage = i;
 			lvi.iSubItem = 0;						
 			lvi.pszText = fileInfo.cFileName;	
+			
 
 			lvi.lParam = i;
 			ListView_InsertItem(hWndListBox, &lvi);
@@ -262,5 +269,140 @@ int FileOperation(TCHAR *from, TCHAR *to, UINT func)
 
 	return SHFileOperation(&shFileOpStr);
 }
+
+INT_PTR CALLBACK DialogFileSearch(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	int i;
+	TCHAR *disk = new TCHAR[256];
+	int k;
+	switch (message)
+	{
+	case WM_INITDIALOG:
+		
+		GetLogicalDriveStrings(256, (LPTSTR)disk);
+		k = _tcslen(disk) + 1;
+		while (*disk != '\0')
+		{
+			disk[1] = 0;
+			SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_ADDSTRING, 0, (LPARAM)(LPCTSTR)disk);
+			disk += k;
+		}
+		
+		return (INT_PTR)TRUE;
+
+	case WM_COMMAND:
+		switch (LOWORD(wParam))
+		{
+		case IDC_COMBO1:
+			if (HIWORD(wParam) == CBN_SELENDOK)
+			{
+				TCHAR str[64];
+				i = SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_GETCURSEL, 0, 0);
+				SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_GETLBTEXT, i, (LPARAM)str);
+				SetWindowText(GetDlgItem(hDlg, IDC_EDIT2), str);
+			}
+			break;
+		case IDOK:
+			
+			return (INT_PTR)TRUE;
+		case IDCANCEL:
+			EndDialog(hDlg, LOWORD(wParam));
+			return (INT_PTR)TRUE;
+		}
+		break;
+	}
+	return (INT_PTR)FALSE;
+}
+
+//void SearchFile(TCHAR *path,TCHAR *name)
+//{
+//	WIN32_FIND_DATA fileInfo;
+//	HANDLE findFile;
+//	TCHAR path2[MAX_PATH];
+//	TCHAR path3[MAX_PATH];
+//
+//
+//	path2[0] = 0;
+//	_tcscat_s(path2, path);
+//	_tcscat_s(path2, _T("*"));
+//
+//
+//
+//	findFile = FindFirstFile(path2, &fileInfo);
+//	if (findFile != INVALID_HANDLE_VALUE)
+//	{
+//		do
+//		{
+//
+//			//--Вывод размера файла--//
+//			if (fileInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+//			{
+//				if (_tcscmp(fileInfo.cFileName,name)==0)
+//					MessageBox(NULL, path2, L"dsada", NULL);
+//				else
+//				{
+//					_tcscat_s(path3 ,path2);
+//					_tcscat_s(path3, fileInfo.cFileName);
+//					_tcscat_s(path3, L"\\");
+//					SearchFile(path3, name);
+//				}
+//			}
+//			else
+//			{
+//				if (_tcscmp(fileInfo.cFileName, name) == 0)
+//				{
+//					_tcscat_s(path2, fileInfo.cFileName);
+//					MessageBox(NULL, path2, L"dsada", NULL);
+//					break;
+//				}
+//			}
+//
+//			
+//		} while (FindNextFile(findFile, &fileInfo));
+//	}
+//}
+void Search(TCHAR *Dir, TCHAR *Mask)
+{
+	TCHAR buf[1000] = { 0 };
+	_tcscat_s(buf, Dir);
+	_tcscat_s(buf,L"\\");
+	_tcscat_s(buf, Mask);
+
+
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hf;
+	hf = FindFirstFile(buf, &FindFileData);
+
+	if (hf != INVALID_HANDLE_VALUE)
+	{
+		do
+		{
+			
+			_tcscat_s(buf, Dir);
+			_tcscat_s(buf, L"\\");
+			_tcscat_s(buf, FindFileData.cFileName);
+			MessageBox(NULL, buf, L"sda", NULL);
+
+
+			if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+			{
+				if (_tcscmp(FindFileData.cFileName,L"..") != 0 && _tcscmp(FindFileData.cFileName, L".") != 0)
+				{
+					// MessageBox(0,"Вы вошли в новую папку","Инфо",MB_OK);
+					Search(buf, Mask);
+				}
+			}
+		} while (FindNextFile(hf, &FindFileData) != 0);
+		FindClose(hf);
+	}
+}
+
+
+
+
+
+
+
+
 
 

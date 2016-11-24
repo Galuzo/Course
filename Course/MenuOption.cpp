@@ -1,5 +1,6 @@
 #include <Windows.h>
 #include "Resource.h"
+#include "UserFunc.h"
 
 void getMenu(HWND hWnd)
 {
@@ -7,6 +8,8 @@ void getMenu(HWND hWnd)
 	menu = CreateMenu();
 	submenu = CreateMenu();
 	AppendMenu(menu, MF_STRING | MF_POPUP, (UINT)submenu, L"Файл");
+	AppendMenu(submenu, MF_STRING, 103, L"Поиск ");
+
 	AppendMenu(submenu, MF_STRING, 100, L"Выход ");
 
 	SetMenu(hWnd, menu);
@@ -29,6 +32,14 @@ void ButtonWork(HWND hWnd,WPARAM wParam,int lastListBox,HWND hWndListBox1,HWND h
 		break;
 	case 100:
 		DestroyWindow(hWnd);
+		break;
+	case 103:
+		/*if (DialogBox(NULL, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, DialogFileSearch) == 1)
+		{
+		
+		}*/
+		//SearchFile(L"C:\\", L"3.jpg");
+		Search(L"C:", L"*.*");
 		break;
 	case ID_BUTTON_RENAME:
 		switch(lastListBox)

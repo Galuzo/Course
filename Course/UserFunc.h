@@ -8,6 +8,11 @@
 	void AddIconToListBox(HWND hWndListBox, int size, TCHAR c_dir[MAX_PATH]);
 	int FileOperation(TCHAR *from, TCHAR *to, UINT func);
 
+	INT_PTR CALLBACK DialogFileSearch(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+
+	void Search(TCHAR * Dir, TCHAR * Mask);
+
+	void SearchFile(TCHAR * path, TCHAR * name);
 	
 
 #endif

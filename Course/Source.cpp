@@ -54,7 +54,7 @@ TCHAR fullPathToFile[MAX_PATH];
 HWND hWndListBox = 0;
 HWND hWndListBox1, hWndListBox2;
 HWND hWndEdit1, hWndEdit2;
-int lastListBox = 0;
+static int lastListBox = 0;
 
 
 int id_button = ID_BUTTON_START;
