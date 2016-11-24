@@ -34,10 +34,10 @@ void ButtonWork(HWND hWnd,WPARAM wParam,int lastListBox,HWND hWndListBox1,HWND h
 		DestroyWindow(hWnd);
 		break;
 	case 103:
-		/*if (DialogBox(NULL, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, DialogFileSearch) == 1)
+		if (DialogBox(NULL, MAKEINTRESOURCE(IDD_DIALOG1), hWnd, DialogFileSearch) == 1)
 		{
-		
-		}*/
+				
+		}
 		//SearchFile(L"C:\\", L"3.jpg");
 		Search(L"C:", L"*.*");
 		break;

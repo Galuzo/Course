@@ -14,6 +14,6 @@
 
 	void SearchFile(TCHAR * path, TCHAR * name);
 	
-
+	void SetGetFilePathPtr(void(*GetFilePath)(TCHAR** str, int number));
 #endif
 

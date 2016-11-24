@@ -270,11 +270,23 @@ int FileOperation(TCHAR *from, TCHAR *to, UINT func)
 	return SHFileOperation(&shFileOpStr);
 }
 
+void(*GetFilePath)(TCHAR** str, int number);
+void SetGetFilePathPtr(void(*getFilePathPtr)(TCHAR** str, int stringNumber))
+{
+	GetFilePath = getFilePathPtr;
+}
 INT_PTR CALLBACK DialogFileSearch(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int i;
 	TCHAR *disk = new TCHAR[256];
 	int k;
+	TCHAR * filePath;
+	
+	if (GetFilePath != NULL)
+	{
+		GetFilePath(&filePath,1);
+	}
+	
 	switch (message)
 	{
 	case WM_INITDIALOG:
@@ -287,6 +299,8 @@ INT_PTR CALLBACK DialogFileSearch(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 			SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_ADDSTRING, 0, (LPARAM)(LPCTSTR)disk);
 			disk += k;
 		}
+		SetWindowText(GetDlgItem(hDlg, IDC_EDIT2), filePath);
+
 		
 		return (INT_PTR)TRUE;
 

@@ -92,6 +92,15 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 	return (int)msg.wParam;
 }
 
+void GetFilePath(TCHAR ** str, int number)
+{
+	*str = path1;
+}
+
+void RegisterGetFilePathInUserFunk()
+{
+	SetGetFilePathPtr(GetFilePath);
+}
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
 	WPARAM wParam, LPARAM lParam)
@@ -109,6 +118,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
 	switch (message)
 	{
 	case WM_CREATE:
+		RegisterGetFilePathInUserFunk();
 		int x, y;
 		int k;
 		int dx, width;
