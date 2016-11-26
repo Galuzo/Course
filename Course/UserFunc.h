@@ -10,10 +10,13 @@
 
 	INT_PTR CALLBACK DialogFileSearch(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 
-	void Search(TCHAR * Dir, TCHAR * Mask);
+	int Search(TCHAR * Dir, TCHAR * Mask, TCHAR * MaskN);
 
-	void SearchFile(TCHAR * path, TCHAR * name);
+	
+
+
 	
 	void SetGetFilePathPtr(void(*GetFilePath)(TCHAR** str, int number));
+	void SetFileName(LPWSTR name);
 #endif
 

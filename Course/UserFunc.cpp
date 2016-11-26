@@ -3,11 +3,17 @@
 #include "UserFunc.h"
 #include <string.h>
 #include <shlwapi.h>
+#pragma warning(disable:4996)
 
 
 
 int CALLBACK SortUpDir(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 void AddIconToListBox(HWND hWndListBox, int size, TCHAR c_dir[MAX_PATH]);
+DWORD WINAPI ThreadSearch(LPVOID t);
+LPWSTR fileName;
+TCHAR pathOfSearch[MAX_PATH];
+TCHAR FileOfSearch[MAX_PATH];
+
 
 HWND CreateListBox(int x, int y, int width, int heigth, HWND hWnd, HMENU id)
 {
@@ -275,6 +281,12 @@ void SetGetFilePathPtr(void(*getFilePathPtr)(TCHAR** str, int stringNumber))
 {
 	GetFilePath = getFilePathPtr;
 }
+
+void SetFileName(LPWSTR name)
+{
+	fileName = name;
+}
+
 INT_PTR CALLBACK DialogFileSearch(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	int i;
@@ -282,24 +294,26 @@ INT_PTR CALLBACK DialogFileSearch(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 	int k;
 	TCHAR * filePath;
 	
+	
 	if (GetFilePath != NULL)
 	{
-		GetFilePath(&filePath,1);
+		GetFilePath(&filePath,3);
 	}
 	
 	switch (message)
 	{
 	case WM_INITDIALOG:
-		
+	
 		GetLogicalDriveStrings(256, (LPTSTR)disk);
 		k = _tcslen(disk) + 1;
 		while (*disk != '\0')
 		{
 			disk[1] = 0;
+	
 			SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_ADDSTRING, 0, (LPARAM)(LPCTSTR)disk);
 			disk += k;
 		}
-		SetWindowText(GetDlgItem(hDlg, IDC_EDIT2), filePath);
+		SetWindowText(GetDlgItem(hDlg, IDC_EDIT2), fileName);
 
 		
 		return (INT_PTR)TRUE;
@@ -313,11 +327,17 @@ INT_PTR CALLBACK DialogFileSearch(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 				TCHAR str[64];
 				i = SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_GETCURSEL, 0, 0);
 				SendMessage(GetDlgItem(hDlg, IDC_COMBO1), CB_GETLBTEXT, i, (LPARAM)str);
+				_tcscat(str, L":\\");
 				SetWindowText(GetDlgItem(hDlg, IDC_EDIT2), str);
 			}
 			break;
 		case IDOK:
 			
+			pathOfSearch[GetWindowText(GetDlgItem(hDlg, IDC_EDIT2), pathOfSearch, MAX_PATH)] = 0;
+			FileOfSearch[GetWindowText(GetDlgItem(hDlg, IDC_EDIT1), FileOfSearch, MAX_PATH)] = 0;
+			CreateThread(NULL, 0, ThreadSearch, 0, 0, NULL);
+			EndDialog(hDlg, 0);
+
 			return (INT_PTR)TRUE;
 		case IDCANCEL:
 			EndDialog(hDlg, LOWORD(wParam));
@@ -374,14 +394,13 @@ INT_PTR CALLBACK DialogFileSearch(HWND hDlg, UINT message, WPARAM wParam, LPARAM
 //			
 //		} while (FindNextFile(findFile, &fileInfo));
 //	}
-//}
-void Search(TCHAR *Dir, TCHAR *Mask)
+
+int Search(TCHAR *Dir, TCHAR *Mask, TCHAR *MaskN)
 {
 	TCHAR buf[1000] = { 0 };
-	_tcscat_s(buf, Dir);
-	_tcscat_s(buf,L"\\");
-	_tcscat_s(buf, Mask);
-
+	_tcscat(buf, Dir);
+	_tcscat(buf, L"\\");
+	_tcscat(buf, Mask);
 
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hf;
@@ -391,24 +410,38 @@ void Search(TCHAR *Dir, TCHAR *Mask)
 	{
 		do
 		{
-			
-			_tcscat_s(buf, Dir);
-			_tcscat_s(buf, L"\\");
-			_tcscat_s(buf, FindFileData.cFileName);
-			MessageBox(NULL, buf, L"sda", NULL);
 
+			
+			_tcscpy(buf,Dir);
+			_tcscat(buf, L"\\");
+			_tcscat(buf, FindFileData.cFileName);
+
+			if (_tcscmp(MaskN, FindFileData.cFileName) == 0) {
+				
+				MessageBox(0, buf, L"INFO", MB_OK);
+				
+			}
 
 			if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 			{
-				if (_tcscmp(FindFileData.cFileName,L"..") != 0 && _tcscmp(FindFileData.cFileName, L".") != 0)
+				if (_tcscmp(FindFileData.cFileName, L"..") != 0 && _tcscmp(FindFileData.cFileName, L".") != 0)
 				{
-					// MessageBox(0,"Вы вошли в новую папку","Инфо",MB_OK);
-					Search(buf, Mask);
+					Search(buf, Mask, MaskN);
 				}
 			}
-		} while (FindNextFile(hf, &FindFileData) != 0);
+		}
+
+		while (FindNextFile(hf, &FindFileData) != 0);
 		FindClose(hf);
 	}
+
+	return 1;
+}
+
+DWORD WINAPI ThreadSearch(LPVOID t)
+{
+	Search(pathOfSearch, L"*", FileOfSearch);
+	return 0;
 }
 
 

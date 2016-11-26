@@ -1,6 +1,7 @@
 #include <Windows.h>
 #include "Resource.h"
 #include "UserFunc.h"
+DWORD WINAPI thread2(LPVOID t);
 
 void getMenu(HWND hWnd)
 {
@@ -39,7 +40,10 @@ void ButtonWork(HWND hWnd,WPARAM wParam,int lastListBox,HWND hWndListBox1,HWND h
 				
 		}
 		//SearchFile(L"C:\\", L"3.jpg");
-		Search(L"C:", L"*.*");
+		//Search(L"C:", L"*.*");
+		//Search(L"C:\\", L"*", L"README.md.txt");
+		//CreateThread(NULL, 0, thread2, 0, 0, NULL);
+
 		break;
 	case ID_BUTTON_RENAME:
 		switch(lastListBox)

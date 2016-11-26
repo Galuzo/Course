@@ -1,6 +1,7 @@
 #include "Lib.h"
 #include "UserFunc.h"
 #include "MenuOption.h"
+
 #define MAX_PATH		512
 
 
@@ -94,7 +95,20 @@ int APIENTRY WinMain(HINSTANCE hInstance,
 
 void GetFilePath(TCHAR ** str, int number)
 {
-	*str = path1;
+	switch (lastListBox)
+	{
+	case 0:
+		*str = path1;
+		break;
+	case 1:
+		*str = path1;
+		break;
+	case 2:
+		*str = path2;
+		break;
+	}
+	
+	
 }
 
 void RegisterGetFilePathInUserFunk()
@@ -127,6 +141,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
 		InitCommonControls();
 	    disk = new TCHAR[256];
 		GetLogicalDrives();
+		SetFileName(path1);
+		
+		// SetFileName(path1);
 		GetLogicalDriveStrings(256, (LPTSTR)disk);
 		x = 10;
 		y = 10;
@@ -202,11 +219,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
 				hWndListBox = hWndListBox1;
 				selectedFile = selectedFile1;
 				lastListBox = 1;
+				SetFileName(path1);
 				break;
 			case ID_LISTBOX_2:
 				hWndListBox = hWndListBox2;
 				selectedFile = selectedFile2;
 				lastListBox = 2;
+				SetFileName(path2);
+
 				break;
 			}
 			if (hWndListBox)
@@ -379,7 +399,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
 				}
 				if (reloadFileList)
 				{
-					lastListBox = 0;
+					//lastListBox = 0;
 					SetWindowText(hWndEdit, path);
 					LoadFileList(hWndListBox, path);
 					switch (lpnmHdr->idFrom)
@@ -423,7 +443,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message,
 			_tcscat_s(path, MAX_PATH, _T(":\\"));
 			SetWindowText(hWndEdit, path);
 			LoadFileList(hWndListBox, path);
-			lastListBox = 0;
+			//lastListBox = 0;
 			selectedFile[0] = 0;
 		}
 		break;
